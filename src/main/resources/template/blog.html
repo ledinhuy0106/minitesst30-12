@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            border: 1px solid;
+        }
+
+        td, tr, th {
+            border: 1px solid;
+        }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+        function findAll() {
+            $.ajax({
+                type: "Get",
+                url: "http://localhost:8080/api/blogs",
+                success: function (blogs) {
+                    console.log(blogs)
+                    display(blogs)
+                },
+                error: function (error) {
+                    alert("Lỗi")
+                }
+            })
+        }
+
+        function showCreateblogs() {
+            let str = '<input type="text" id="title" placeholder="Tiêu đề">\n' +
+                '        <input type="text" id="content" placeholder="nội dung">\n' +
+                '        <select id="idstatus">'
+            $.ajax({
+                type: "Get",
+                url: "http://localhost:8080/api/blogs/status",
+                success: function (statuss) {
+                    console.log(statuss)
+                    for (let i = 0; i < statuss.length; i++) {
+                        str += ` <option value="${statuss[i].id}">${statuss[i].title}</option>`
+                    }
+                    str += '</select> <button onclick="saveblogs()">create</button>'
+                    document.getElementById("res").innerHTML = str
+                },
+                error: function (error) {
+                    alert("sai lè")
+                }
+            })
+        }
+
+        function saveblogs() {
+            let blogs = {
+                title: document.getElementById("title").value,
+                content: document.getElementById("content").value,
+                status: {
+                    id: document.getElementById("idstatus").value
+                }
+            }
+            console.log(blogs)
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: "POST",
+                url: "http://localhost:8080/api/blogs",
+                data: JSON.stringify(blogs),
+                success: findAll,
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function deleteblogs(id) {
+            console.log(id)
+            if (confirm("Bạn có chắc muốn xóa không ?")) {
+                $.ajax({
+                    type: "Delete",
+                    url: "http://localhost:8080/api/blogs/" + id,
+                    success: findAll,
+                    error: function (error) {
+                        alert("tạch")
+                    }
+
+                })
+            }
+
+        }
+
+        function showEditblogs(id) {
+            console.log(id)
+            let str = '';
+            $.ajax({
+                type: "Put",
+                url: "http://localhost:8080/api/blogs/" + id,
+                success: function (blogs) {
+                    console.log(blogs)
+                    str += '<input type="text" value="' + blogs.title + '" id="title">\n' +
+                        '<input type="text" value="' + blogs.content + '" id="content">\n' +
+                        '<select id="idstatus">\n';
+                    $.ajax({
+                        type: "Get",
+                        url: "http://localhost:8080/api/blogs/status",
+                        success: function (statuss) {
+                            console.log(statuss)
+                            for (let i = 0; i < statuss.length; i++) {
+                                str += ` <option value="${statuss[i].id}">${statuss[i].name}</option>`
+                            }
+                            str += '</select>' + '    <button onclick="saveEdit(' + blogs.id + ')">Save</button>'
+                            document.getElementById("res").innerHTML = str
+                        }
+                    })
+
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function saveEdit(id) {
+            let blogs = {
+                title: document.getElementById("title").value,
+                content: document.getElementById("content").value,
+                status: {
+                    id: document.getElementById("idstatus").value,
+                }
+            }
+            console.log(blogs)
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: "Put",
+                url: "http://localhost:8080/api/blogs/" + id,
+                data: JSON.stringify(blogs),
+                success: findAll,
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function findOne(id) {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/blogs/" + id,
+                success: function (blogs) {
+                    console.log(blogs)
+                    document.getElementById("res").innerHTML =
+                        "<h3>" + 'Tiêu Đề   :   ' + blogs.title + "</h3>" +
+                        "<p>" + 'Nội dung :   ' + blogs.content + "</p>"+
+                        "<p>" + 'Thời gian đăng :   ' + blogs.time + "</p>"
+
+
+                }
+            })
+        }
+
+
+        function status() {
+            let str = '<select id="idstatus">\n';
+            $.ajax({
+                type: "Get",
+                url: "http://localhost:8080/api/blogs/status",
+                success: function (statuss) {
+                    console.log(statuss)
+                    for (let i = 0; i < statuss.length; i++) {
+                        str += ` <option value="${statuss[i].id}">${statuss[i].title}</option>`
+                    }
+                    str += '</select>' + '    <button onclick="findBystatus(' + statuss.id + ')">Save</button>'
+                    document.getElementById("res").innerHTML = str
+                }
+            })
+        }
+
+        function findBystatus() {
+            let id = document.getElementById("idstatus").value;
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/blogs/public/" + id,
+                success: function (status) {
+                    console.log(status)
+                    display(status)
+                }
+            })
+        }
+
+        function display(blogs) {
+            let str = "<table id='t' >\n" +
+                "    <tr>\n" +
+                "        <th> Tiêu đề</th>\n" +
+                "        <th>Trạng thái</th>\n" +
+                "        <th>Thời gian đăng bài</th>\n" +
+                "        <th> Sửa</th>\n" +
+                "        <th> Xóa</th>\n" +
+                "        <th> Chi tiết</th>\n" +
+                "    </tr>"
+            for (let i = 0; i < blogs.length; i++) {
+                str += "<tr>" + "<td>" + blogs[i].title + "</td>\n" +
+                    " <td>" + blogs[i].status.name + "</td>" +
+                    " <td>" + blogs[i].time + "</td>" +
+                    " <td>" + "<button onclick=\"showEditblogs(" + blogs[i].id + ")\">edit</button>\n" + "</td>" +
+
+                    " <td>" + "<button onclick=\"deleteblogs(" + blogs[i].id + ")\">delete</button>\n" + "</td>" +
+                    " <td>" + "<button onclick=\"findOne(" + blogs[i].id + ")\">profile</button>" + "</td>" +
+                    "</tr>"
+            }
+            str += " </table>"
+            document.getElementById("res").innerHTML = str
+        }
+    </script>
+</head>
+<body>
+<center>
+
+    <button><a href="blog.html"></a>Trang chủ</button>
+
+    <button onclick="findAll()">
+        Tất cả bài đăng
+    </button>
+    <button onclick="showCreateblogs()">
+       Thêm bài đăng
+    </button>
+    <button onclick="status()">
+        Theo trạng thái
+    </button>
+
+    <div id="status">
+
+    </div>
+</center>
+
+<center>
+    <div id="res">
+    </div>
+</center>
+</body>
+</html>

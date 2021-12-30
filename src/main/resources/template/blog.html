@@ -24,7 +24,7 @@
                     display(blogs)
                 },
                 error: function (error) {
-                    alert("Lỗi")
+                    console.log(error)
                 }
             })
         }
@@ -36,16 +36,13 @@
             $.ajax({
                 type: "Get",
                 url: "http://localhost:8080/api/blogs/status",
-                success: function (statuss) {
-                    console.log(statuss)
-                    for (let i = 0; i < statuss.length; i++) {
-                        str += ` <option value="${statuss[i].id}">${statuss[i].title}</option>`
+                success: function (status) {
+                    console.log(status)
+                    for (let i = 0; i < status.length; i++) {
+                        str += ` <option value="${status[i].id}">${status[i].name}</option>`
                     }
                     str += '</select> <button onclick="saveblogs()">create</button>'
                     document.getElementById("res").innerHTML = str
-                },
-                error: function (error) {
-                    alert("sai lè")
                 }
             })
         }
@@ -58,6 +55,7 @@
                     id: document.getElementById("idstatus").value
                 }
             }
+
             console.log(blogs)
             $.ajax({
                 headers: {
@@ -80,11 +78,7 @@
                 $.ajax({
                     type: "Delete",
                     url: "http://localhost:8080/api/blogs/" + id,
-                    success: findAll,
-                    error: function (error) {
-                        alert("tạch")
-                    }
-
+                    success: findAll
                 })
             }
 
@@ -96,20 +90,20 @@
             $.ajax({
                 type: "Put",
                 url: "http://localhost:8080/api/blogs/" + id,
-                success: function (blogs) {
-                    console.log(blogs)
-                    str += '<input type="text" value="' + blogs.title + '" id="title">\n' +
-                        '<input type="text" value="' + blogs.content + '" id="content">\n' +
+                success: function (blog) {
+                    console.log(blog)
+                    str += '<input type="text" value="' + blog.title + '" id="title">\n' +
+                        '<input type="text" value="' + blog.content + '" id="content">\n' +
                         '<select id="idstatus">\n';
                     $.ajax({
                         type: "Get",
                         url: "http://localhost:8080/api/blogs/status",
-                        success: function (statuss) {
-                            console.log(statuss)
-                            for (let i = 0; i < statuss.length; i++) {
-                                str += ` <option value="${statuss[i].id}">${statuss[i].name}</option>`
+                        success: function (status) {
+                            console.log(status)
+                            for (let i = 0; i < status.length; i++) {
+                                str += ` <option value="${status[i].id}">${status[i].name}</option>`
                             }
-                            str += '</select>' + '    <button onclick="saveEdit(' + blogs.id + ')">Save</button>'
+                            str += '</select>' + '    <button onclick="saveEdit(' + blog.id + ')">Save</button>'
                             document.getElementById("res").innerHTML = str
                         }
                     })
@@ -149,12 +143,12 @@
             $.ajax({
                 type: "GET",
                 url: "http://localhost:8080/api/blogs/" + id,
-                success: function (blogs) {
-                    console.log(blogs)
+                success: function (blog) {
+                    console.log(blog)
                     document.getElementById("res").innerHTML =
-                        "<h3>" + 'Tiêu Đề   :   ' + blogs.title + "</h3>" +
-                        "<p>" + 'Nội dung :   ' + blogs.content + "</p>"+
-                        "<p>" + 'Thời gian đăng :   ' + blogs.time + "</p>"
+                        "<h3>" + 'Tiêu Đề   :   ' + blog.title + "</h3>" +
+                        "<p>" + 'Nội dung :   ' + blog.content + "</p>" +
+                        "<p>" + 'Thời gian đăng :   ' + blog.time + "</p>"
 
 
                 }
@@ -167,12 +161,12 @@
             $.ajax({
                 type: "Get",
                 url: "http://localhost:8080/api/blogs/status",
-                success: function (statuss) {
-                    console.log(statuss)
-                    for (let i = 0; i < statuss.length; i++) {
-                        str += ` <option value="${statuss[i].id}">${statuss[i].title}</option>`
+                success: function (status) {
+                    console.log(status)
+                    for (let i = 0; i < status.length; i++) {
+                        str += ` <option value="${status[i].id}">${status[i].name}</option>`
                     }
-                    str += '</select>' + '    <button onclick="findBystatus(' + statuss.id + ')">Save</button>'
+                    str += '</select>' + '    <button onclick="findBystatus(' + status.id + ')">Save</button>'
                     document.getElementById("res").innerHTML = str
                 }
             })
@@ -190,7 +184,7 @@
             })
         }
 
-        function display(blogs) {
+        function display(blog) {
             let str = "<table id='t' >\n" +
                 "    <tr>\n" +
                 "        <th> Tiêu đề</th>\n" +
@@ -198,43 +192,35 @@
                 "        <th>Thời gian đăng bài</th>\n" +
                 "        <th> Sửa</th>\n" +
                 "        <th> Xóa</th>\n" +
-                "        <th> Chi tiết</th>\n" +
                 "    </tr>"
-            for (let i = 0; i < blogs.length; i++) {
-                str += "<tr>" + "<td>" + blogs[i].title + "</td>\n" +
-                    " <td>" + blogs[i].status.name + "</td>" +
-                    " <td>" + blogs[i].time + "</td>" +
-                    " <td>" + "<button onclick=\"showEditblogs(" + blogs[i].id + ")\">edit</button>\n" + "</td>" +
+            for (let i = 0; i < blog.length; i++) {
+                str += "<tr>" + " <td>"+"<p onclick='findOne("+blog[i].id+")'>" +blog[i].title+"</p>"+ "</td>\n" +
 
-                    " <td>" + "<button onclick=\"deleteblogs(" + blogs[i].id + ")\">delete</button>\n" + "</td>" +
-                    " <td>" + "<button onclick=\"findOne(" + blogs[i].id + ")\">profile</button>" + "</td>" +
-                    "</tr>"
+                    " <td>" + blog[i].status.name + "</td>" +
+                    " <td>" + blog[i].time + "</td>" +
+                    " <td>" + "<button onclick=\"showEditblogs(" + blog[i].id + ")\">edit</button>\n" + "</td>" +
+                    " <td>" + "<button onclick=\"deleteblogs(" + blog[i].id + ")\">delete</button>\n" + "</td>" + "</tr>"
             }
             str += " </table>"
             document.getElementById("res").innerHTML = str
         }
     </script>
 </head>
-<body>
+<body onload="findAll()">
 <center>
-
-    <button><a href="blog.html"></a>Trang chủ</button>
-
+    <button onclick="findAll()" >Trang chủ</button>
     <button onclick="findAll()">
         Tất cả bài đăng
     </button>
     <button onclick="showCreateblogs()">
-       Thêm bài đăng
+        Đăng bài
     </button>
     <button onclick="status()">
-        Theo trạng thái
+        Xem bài đăng theo trạng thái
     </button>
-
     <div id="status">
-
     </div>
 </center>
-
 <center>
     <div id="res">
     </div>

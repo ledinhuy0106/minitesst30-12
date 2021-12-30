@@ -57,17 +57,16 @@ public class BlogController {
         return new ResponseEntity<>(blog.get(),HttpStatus.OK);
     }
     //1
-    @GetMapping("public/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<Iterable<Blog>> Public(@PathVariable Long id){
         Optional<Status> status=statusimpl.findById(id);
         Iterable<Blog> blogs=blogimpl.findAllByStatus(status.get());
         return new ResponseEntity<>(blogs,HttpStatus.OK);
     }
-    @GetMapping("status/{id}")
-    public ResponseEntity<Iterable<Blog>> findByStatus(@PathVariable Long id){
-        Optional<Status> status=statusimpl.findById(id);
-        Iterable<Blog> blogs=blogimpl.findAllByStatus(status.get());
-        return new ResponseEntity<>(blogs,HttpStatus.OK);
-    }
 
+    @GetMapping("status")
+    public ResponseEntity<Iterable<Status>> findAllCategory(){
+        Iterable<Status> statuses=statusimpl.findAll();
+        return new ResponseEntity<>(statuses,HttpStatus.OK);
+    }
 }
